@@ -30,7 +30,7 @@ export class AuthService {
     // сразу авторизуем после регистрации
     const payload = { sub: user.id, email: user.email };
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '10m' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '2m' }),
       user: { id: user.id, name: user.name, email: user.email },
     };
   }
@@ -46,7 +46,7 @@ export class AuthService {
   async login(user: User) {
     const payload = { sub: user.id, email: user.email };
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '10m' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '2m' }),
     };
   }
 }
