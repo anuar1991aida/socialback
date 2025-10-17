@@ -33,6 +33,16 @@ export class AccountsController {
         throw new HttpException('url query parameter is required', HttpStatus.BAD_REQUEST);
     }
 
+    const decoded = decodeURIComponent(url);
+    
+    // 🧠 Проверяем, не base64 ли это
+    if (decoded.startsWith('/9j/') || decoded.length > 1000) {
+        // Отдаём напрямую как base64 → image/jpeg
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.send(Buffer.from(decoded, 'base64'));
+        return;
+    }
+
     try {
         const resp = await axios.get<ArrayBuffer>(url, { responseType: 'arraybuffer' });
         const contentType = resp.headers['content-type'] || 'image/jpeg';
