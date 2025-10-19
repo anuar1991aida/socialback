@@ -22,54 +22,31 @@ export class PostsController {
     @Query('accountId') accountId: number,
   ) {
     const [data, total] = await this.postsService.findAll(
-        Number(page),
-        Number(limit),
-        Number(accountId),
-      );
-
-      if (!accountId) {
-        throw new HttpException('accountId is required', HttpStatus.BAD_REQUEST);
-      }
-
-      const host = req.get('host') || req.headers.host;
-      const protocol =
-        (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
-
-      // ⚙️ Получаем аккаунт по ID
-      const account = await this.postsService.getAccountById(Number(accountId));
-
-      const accountWithProxy = account
-        ? {
-            ...account,
-            profile_pic_url: account.profile_pic_url
-              ? `${protocol}://${host}/accounts/proxy?url=${encodeURIComponent(
-                  account.profile_pic_url,
-                )}`
-              : null,
-          }
-        : null;
-
-      // ⚙️ Преобразуем изображения постов
-      const mappedData = data.map((_post) => ({
-        ..._post,
-        image_url: _post.image_url
-          ? `${protocol}://${host}/accounts/proxy?url=${encodeURIComponent(
-              _post.image_url,
-            )}`
-          : null,
-      }));
-
-      return {
-        account: accountWithProxy,
-        data: mappedData,
-        meta: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          totalPages: Math.ceil(total / Number(limit)),
-        },
-      };
-
+      Number(page),
+      Number(limit),
+      Number(accountId),
+    );
+  
+    const host = req.get('host') || req.headers.host;
+    const protocol =
+      (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
+  
+    const mappedData = data.map((_post) => ({
+      ..._post,
+      image_url: `${protocol}://${host}/accounts/proxy?url=${encodeURIComponent(
+        _post.image_url,
+      )}`,
+    }));
+  
+    return {
+      data: mappedData,
+      meta: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / Number(limit)),
+      },
+    };
   }
 
   @Get(':id')
@@ -91,16 +68,6 @@ export class PostsController {
     async proxyImage(@Query('url') url: string, @Res() res: Response) {
     if (!url) {
         throw new HttpException('url query parameter is required', HttpStatus.BAD_REQUEST);
-    }
-
-     const decoded = decodeURIComponent(url);
-    
-    // 🧠 Проверяем, не base64 ли это
-    if (decoded.startsWith('/9j/') || decoded.length > 1000) {
-        // Отдаём напрямую как base64 → image/jpeg
-        res.setHeader('Content-Type', 'image/jpeg');
-        res.send(Buffer.from(decoded, 'base64'));
-        return;
     }
 
     try {
