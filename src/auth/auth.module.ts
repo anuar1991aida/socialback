@@ -12,8 +12,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({ isGlobal: true }), // ✅ чтобы ConfigService работал везде
     TypeOrmModule.forFeature([User]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'my_jwt_secret',
-      signOptions: { expiresIn: '10m' },
+      secret: process.env.JWT_SECRET || 'my_jwt_secret'
     }),
   ],
   controllers: [AuthController],
