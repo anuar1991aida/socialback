@@ -76,7 +76,7 @@ export class AuthService {
 
     return {
       message: 'Авторизация прошла успешно',
-      access_token: this.jwtService.sign(payload, { expiresIn: '15m' }),
+      access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
         name: user.name,
