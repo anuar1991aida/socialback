@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Posts } from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { Comments } from 'src/comments/comments.entity';
+import { Accounts } from 'src/accounts/accounts.entity';
 
 @Injectable()
 export class PostsService {
@@ -14,6 +15,9 @@ export class PostsService {
   constructor(
     @InjectRepository(Posts)
     private postsRepo: Repository<Posts>,
+
+    @InjectRepository(Accounts)
+    private accountsRepo: Repository<Accounts>, 
     // private commentsRepo: Repository<Comments>,
   ) {}
 
@@ -59,6 +63,10 @@ export class PostsService {
 
   findOne(id: number) {
     return `This action returns a #${id} post`;
+  }
+
+  async getAccountById(id: number): Promise<Accounts | null> {
+    return await this.accountsRepo.findOne({ where: { id } });
   }
 
   update(id: number, updatePostDto: UpdatePostDto) {

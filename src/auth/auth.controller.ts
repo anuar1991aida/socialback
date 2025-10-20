@@ -1,18 +1,43 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
+
+  // 🔹 Регистрация нового пользователя
+  @Post('register')
+  async register(
+    @Body() body: { name: string; email: string; password: string },
+  ) {
+    const { name, email, password } = body;
+
+    if (!name || !email || !password) {
+      throw new BadRequestException('Name, email and password are required');
+    }
+
+    return this.authService.register({ name, email, password });
+  }
 
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
-    const user = await this.authService.validateUser(body.email, body.password);
-    return this.authService.login(user);
-  }
+    const { email, password } = body;
 
-  @Post('register')
-  async register(@Body() body: { name: string; email: string; password: string }) {
-    return this.authService.register(body);
+    if (!email || !password) {
+      throw new BadRequestException('Email and password are required');
+    }
+
+    const user = await this.authService.validateUser(email, password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return this.authService.login(user);
   }
 }
