@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +23,10 @@ async function bootstrap() {
     credentials: true,
   })
 
-  await app.listen(8888, '192.168.10.49');
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  app.use('/media', express.static(join(__dirname, '..', 'media')));
+
+  // await app.listen(8888, '192.168.10.49');
+  await app.listen(8888, '192.168.10.147');
 }
 bootstrap();

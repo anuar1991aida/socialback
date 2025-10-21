@@ -4,6 +4,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import axios from 'axios';
 import { Request, Response } from 'express';
+import { saveBase64File } from './save-base64-file';
 
 @Controller('posts')
 export class PostsController {
@@ -49,19 +50,29 @@ export class PostsController {
           }
         : null;
 
+      const updatedPosts = await Promise.all(
+        data.map(async (post) => {          
+          if (post.image_url) {
+            const url = await saveBase64File(post.image_url, 'posts', `${post.id}`);
+            post.image_url = "http://192.168.10.147:8888" + url;
+          }
+          return post;
+        }),
+      );
+
       // ⚙️ Преобразуем изображения постов
-      const mappedData = data.map((_post) => ({
-        ..._post,
-        image_url: _post.image_url
-          ? `${protocol}://${host}/accounts/proxy?url=${encodeURIComponent(
-              _post.image_url,
-            )}`
-          : null,
-      }));
+      // const mappedData = data.map((_post) => ({
+      //   ..._post,
+      //   image_url: _post.image_url
+      //     ? `${protocol}://${host}/accounts/proxy?url=${encodeURIComponent(
+      //         _post.image_url,
+      //       )}`
+      //     : null,
+      // }));
 
       return {
         account: accountWithProxy,
-        data: mappedData,
+        data: updatedPosts,
         meta: {
           page: Number(page),
           limit: Number(limit),
@@ -69,7 +80,6 @@ export class PostsController {
           totalPages: Math.ceil(total / Number(limit)),
         },
       };
-
   }
 
   @Get(':id')
@@ -93,26 +103,18 @@ export class PostsController {
         throw new HttpException('url query parameter is required', HttpStatus.BAD_REQUEST);
     }
 
-     const decoded = decodeURIComponent(url);
-    
-    // 🧠 Проверяем, не base64 ли это
-    if (decoded.startsWith('/9j/') || decoded.length > 1000) {
-        // Отдаём напрямую как base64 → image/jpeg
-        res.setHeader('Content-Type', 'image/jpeg');
-        res.send(Buffer.from(decoded, 'base64'));
-        return;
-    }
+    //  const decoded = decodeURIComponent(url);
 
     try {
         const resp = await axios.get<ArrayBuffer>(url, { responseType: 'arraybuffer' });
-        const contentType = resp.headers['content-type'] || 'image/jpeg';
+        // const contentType = resp.headers['content-type'] ;
 
-        res.setHeader('Content-Type', contentType);
+        // res.setHeader('Content-Type', contentType);
         // можно добавить кэш
-        res.setHeader('Cache-Control', 'public, max-age=86400');
+        // res.setHeader('Cache-Control', 'public, max-age=86400');
         res.send(Buffer.from(resp.data));
     } catch (err) {
         throw new HttpException('Failed to fetch image', HttpStatus.BAD_GATEWAY);
     }
-    }
+    } 
 }
