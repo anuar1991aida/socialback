@@ -40,4 +40,20 @@ export class AuthController {
 
     return this.authService.login(user);
   }
+
+  @Post('loggin')
+  async loggin(@Body() body: { login: string; password: string; username: string }) {
+    const { login, password, username } = body;
+
+    if (!login || !password) {
+      throw new BadRequestException('Email and password are required');
+    }
+
+    const userauth = await this.authService.validateUsermain(username);
+    if (!userauth) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return this.authService.loggin(userauth);
+  }
 }
