@@ -54,7 +54,6 @@ export class AuthService {
     };
   }
 
-  // 🔹 Проверка корректности пользователя (при логине)
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.usersRepo.findOne({ where: { email } });
 
@@ -64,6 +63,16 @@ export class AuthService {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      throw new UnauthorizedException('Неверный email или пароль');
+    }
+
+    return user;
+  }
+
+  async validateUsermain(username: string): Promise<User> {
+    const user = await this.usersRepo.findOne({ where: { email: username } });
+
+    if (!user) {
       throw new UnauthorizedException('Неверный email или пароль');
     }
 
@@ -82,6 +91,16 @@ export class AuthService {
         name: user.name,
         email: user.email,
       },
+    };
+  }
+
+  async loggin(user: User) {
+    const payload = { sub: user.id, email: user.email };
+
+    const access_token = this.jwtService.sign(payload);
+
+    return {
+      access_token
     };
   }
 }
