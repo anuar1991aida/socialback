@@ -39,14 +39,29 @@ export class PostsController {
       // ⚙️ Получаем аккаунт по ID
       const account = await this.postsService.getAccountById(Number(accountId));
 
+      let accountProfilePicUrl: string | null = null;
+
+      if (account?.profile_pic_url) {
+        const url = account.profile_pic_url;
+
+        // ✅ исправленная проверка base64 как в AccountsController
+        const isBase64 =
+          typeof url === 'string' &&
+          (url.startsWith('data:image/') || (url.length > 200 && /^[A-Za-z0-9+/=]+$/.test(url)));
+
+        if (isBase64) {
+          const saved = await saveBase64File(url, 'accounts', `${account.id}`);
+          accountProfilePicUrl = `${protocol}://${host}${saved}`;
+        } else {
+          // ⚡ прокси для обычного URL
+          accountProfilePicUrl = `${protocol}://${host}/accounts/proxy?url=${encodeURIComponent(url)}`;
+        }
+      }
+
       const accountWithProxy = account
         ? {
             ...account,
-            profile_pic_url: account.profile_pic_url
-              ? `${protocol}://${host}/accounts/proxy?url=${encodeURIComponent(
-                  account.profile_pic_url,
-                )}`
-              : null,
+            profile_pic_url: accountProfilePicUrl,
           }
         : null;
 
@@ -103,7 +118,13 @@ export class PostsController {
         throw new HttpException('url query parameter is required', HttpStatus.BAD_REQUEST);
     }
 
-    //  const decoded = decodeURIComponent(url);
+     const decoded = decodeURIComponent(url);
+    if (decoded.startsWith('/9j/') || decoded.length > 1000) {
+            // Отдаём напрямую как base64 → image/jpeg
+            res.setHeader('Content-Type', 'image/jpeg');
+            res.send(Buffer.from(decoded, 'base64'));
+            return;
+        }
 
     try {
         const resp = await axios.get<ArrayBuffer>(url, { responseType: 'arraybuffer' });
