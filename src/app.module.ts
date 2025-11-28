@@ -6,6 +6,7 @@ import { AccountsModule } from './accounts/accounts.module';
 import { PostsModule } from './posts/posts.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { ProfileModule } from './profile/profile.module';
     }),
     PostsModule,
     AuthModule,
-    ProfileModule
+    ProfileModule,
+    NewsModule
   ],
   controllers: [AppController],
   providers: [AppService],
