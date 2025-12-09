@@ -51,6 +51,8 @@ export class NewsController {
     return { success: true, message: 'Parsing completed' };
   }
 
+
+  
   @Post('batch')
   async createMultipleNews(@Body() newsItems: any[]): Promise<{ newItems: number; duplicates: number }> {
     return this.newsService.saveMultipleNews(newsItems);

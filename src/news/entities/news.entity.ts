@@ -25,4 +25,7 @@ export class News {
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;
+
+  
 }
+

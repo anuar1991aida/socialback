@@ -41,6 +41,9 @@ export class NewsService {
     const updatedNews = await this.newsRepository.save(news);
     // TypeORM save может вернуть массив, поэтому берем первый элемент если это массив
     return Array.isArray(updatedNews) ? updatedNews[0] : updatedNews;
+
+
+    
   }
 
   async remove(id: number): Promise<void> {
