@@ -66,14 +66,28 @@ export class PostsController {
         : null;
 
       const updatedPosts = await Promise.all(
-        data.map(async (post) => {          
-          if (post.image_url) {
-            const url = await saveBase64File(post.image_url, 'posts', `${post.id}`);
-            post.image_url = "http://192.168.10.147:8888" + url;
+        data.map(async (post) => {
+          if (!post.image_url) return post;
+
+          const rawUrl = post.image_url;
+
+          const isBase64 =
+            rawUrl.startsWith('data:image/') ||
+            (rawUrl.length > 200 && /^[A-Za-z0-9+/=]+$/.test(rawUrl));
+
+          if (isBase64) {
+            // ✅ base64 → сохраняем локально
+            const saved = await saveBase64File(rawUrl, 'posts', `${post.id}`);
+            post.image_url = `${protocol}://${host}${saved}`;
+          } else {
+            // ✅ HTTPS → ВОЗВРАЩАЕМ КАК ЕСТЬ
+            post.image_url = rawUrl;
           }
+
           return post;
         }),
       );
+
 
       // ⚙️ Преобразуем изображения постов
       // const mappedData = data.map((_post) => ({
