@@ -7,9 +7,15 @@ import { PostsModule } from './posts/posts.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { NewsModule } from './news/news.module';
+import { ConfigModule } from '@nestjs/config';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ 
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     AccountsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -19,12 +25,13 @@ import { NewsModule } from './news/news.module';
       password: '147258',       
       database: 'social',       
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false, 
+      synchronize: true, 
     }),
     PostsModule,
     AuthModule,
     ProfileModule,
-    NewsModule
+    NewsModule,
+    ReportModule
   ],
   controllers: [AppController],
   providers: [AppService],
