@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, CreateDateColumn, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Accounts } from '../../accounts/accounts.entity'
 
 @Entity('posts')
@@ -21,6 +21,9 @@ export class Posts {
 
   @Column()
   db_acc_id: number;
+
+  @Column({nullable:true})
+  post_url: string;
 
   @Column({nullable:true})
   image_url: string;

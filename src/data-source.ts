@@ -1,6 +1,5 @@
 import { DataSource } from 'typeorm';
 import { User } from './user/user.entity';
-import { Comments } from './comments/comments.entity';
 import { Posts } from './posts/entities/post.entity';
 import { Accounts } from './accounts/accounts.entity';
 // import { User } from './users/user.entity';
@@ -12,7 +11,7 @@ export const AppDataSource = new DataSource({
   username: 'postgres',   // свой логин
   password: '147258',      // свой пароль
   database: 'social',
-  entities: [User, Accounts, Posts, Comments ],
+  entities: [User, Accounts, Posts ],
   migrations: ['src/migrations/*.ts'],
   synchronize: false, // всегда false в проде
 });
